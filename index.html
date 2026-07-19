@@ -2,153 +2,383 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
-    <title>Cinematic Player</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Worker Debugger Dashboard</title>
     <style>
-        body,html{margin:0;padding:0;width:100%;height:100%;background:#000;overflow:hidden;font-family:system-ui,-apple-system,sans-serif;user-select:none;background-color:#000;-webkit-tap-highlight-color:transparent}#player-wrap{position:relative;width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:hidden}video{width:100%;height:100%;object-fit:contain;outline:none}.vid-overlay{position:absolute;inset:0;z-index:11;cursor:pointer}.ui-layer{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;background:linear-gradient(0deg,rgba(0,0,0,.9) 0,transparent 40%,transparent 100%);opacity:1;transition:opacity .3s ease;z-index:20;pointer-events:none}.ui-layer.idle{opacity:0}.top-bar{position:absolute;top:0;left:0;right:0;padding:20px;background:linear-gradient(180deg,rgba(0,0,0,.8) 0,transparent 100%);display:flex;flex-direction:column;gap:5px;pointer-events:auto}.s-title{color:#fff;font-size:max(16px,min(4vw,18px));font-weight:600;text-shadow:1px 1px 3px #000}.e-title{color:#ddd;font-size:max(12px,min(3vw,14px));text-shadow:1px 1px 3px #000}.controls{padding:10px 15px 20px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;pointer-events:auto}.progress-wrap{width:100%;height:15px;display:flex;align-items:center;cursor:pointer;position:relative}.progress-bg{width:100%;height:4px;background:rgba(255,255,255,.2);border-radius:2px;position:relative}.progress-fill{height:100%;background:#e50914;width:0;border-radius:2px;position:absolute;top:0;left:0}.progress-fill::after{content:'';position:absolute;right:-6px;top:50%;transform:translateY(-50%) scale(0);width:12px;height:12px;background:#e50914;border-radius:50%;transition:transform .2s}.progress-wrap:hover .progress-fill::after,.progress-wrap:active .progress-fill::after{transform:translateY(-50%) scale(1)}.btn{background:0 0;border:none;color:#fff;cursor:pointer;font-size:22px;padding:0;display:flex;align-items:center;justify-content:center;transition:transform .1s}.btn:active{transform:scale(.8)}.vol-wrap{display:flex;align-items:center;gap:5px}.vol-track{width:0;height:4px;background:rgba(255,255,255,.2);border-radius:2px;cursor:pointer;overflow:hidden;transition:width .3s ease;opacity:0}@media(hover:hover){.vol-wrap:hover .vol-track{width:60px;opacity:1}}.vol-fill{height:100%;background:#fff;width:100%;pointer-events:none}.time-txt{color:#eee;font-size:13px;font-variant-numeric:tabular-nums;margin-right:auto}.q-select{background:rgba(20,20,20,.8);color:#fff;border:1px solid rgba(255,255,255,.2);padding:6px 10px;border-radius:5px;font-size:13px;cursor:pointer;outline:none}.btn-text{font-size:13px;background:rgba(20,20,20,.8);border:1px solid rgba(255,255,255,.2);padding:6px 12px;border-radius:5px;display:none;align-items:center;gap:5px}.buffering{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:50px;height:50px;border:4px solid rgba(255,255,255,.2);border-top-color:#e50914;border-radius:50%;animation:spin 1s linear infinite;display:none;pointer-events:none}#thumb-preview{position:absolute;bottom:25px;width:160px;height:90px;background-color:#111;background-size:auto;background-repeat:no-repeat;border:2px solid #fff;border-radius:4px;display:none;pointer-events:none;transform:translateX(-50%);z-index:30;box-shadow:0 4px 10px rgba(0,0,0,.5)}@keyframes spin{100%{transform:translate(-50%,-50%) rotate(360deg)}}.show-buf .buffering{display:block}.eps-drawer{position:absolute;top:0;bottom:0;right:-320px;width:100%;max-width:300px;background:rgba(15,15,15,.95);z-index:50;transition:right .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;border-left:1px solid rgba(255,255,255,.1);box-shadow:-5px 0 15px rgba(0,0,0,.5);backdrop-filter:blur(10px)}.eps-drawer.open{right:0}.drawer-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.6);z-index:40;opacity:0;pointer-events:none;transition:opacity .3s}.drawer-backdrop.open{opacity:1;pointer-events:auto}.drawer-header{padding:15px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid rgba(255,255,255,.1);color:#fff;font-weight:bold;font-size:15px}.close-drawer{background:0 0;border:none;color:#fff;font-size:24px;cursor:pointer}.search-box{padding:10px 15px}.search-box input{width:100%;box-sizing:border-box;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:10px 14px;border-radius:20px;color:#fff;font-size:14px;outline:none}.eps-grid{flex:1;overflow-y:auto;padding:0 15px 15px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;align-content:start}.ep-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:12px 0;border-radius:6px;cursor:pointer;font-size:14px;text-align:center;transition:background .2s}.ep-btn.active{background:#e50914;border-color:#e50914;font-weight:bold}.center-action{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) scale(1);width:70px;height:70px;background:rgba(0,0,0,.5);border-radius:50%;display:flex;justify-content:center;align-items:center;font-size:30px;color:#fff;pointer-events:none;opacity:0;backdrop-filter:blur(5px);z-index:25}.center-action.pop{animation:popAnim .5s cubic-bezier(.175,.885,.32,1.275) forwards}@keyframes popAnim{0%{opacity:1;transform:translate(-50%,-50%) scale(.8)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.5)}}.ripple-zone{position:absolute;top:0;bottom:0;width:40%;pointer-events:none;z-index:25;display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;opacity:0;background:radial-gradient(circle,rgba(255,255,255,.15) 0,transparent 60%)}.ripple-zone.left{left:0;background-position:left center;border-top-right-radius:50%;border-bottom-right-radius:50%}.ripple-zone.right{right:0;background-position:right center;border-top-left-radius:50%;border-bottom-left-radius:50%}.ripple-zone.active{animation:rippleAnim .6s ease-out forwards}.r-icon{font-size:28px;margin-bottom:5px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.5))}.r-text{font-size:13px;font-weight:bold;text-shadow:0 1px 3px rgba(0,0,0,.8)}@keyframes rippleAnim{0%{opacity:1}100%{opacity:0}}@media screen and (max-width:600px){.controls{padding:8px 10px 15px;gap:6px}.progress-wrap{flex:1 1 100%;margin-bottom:8px}.btn{font-size:18px!important;width:28px!important}.time-txt{font-size:11px;margin-right:auto}.btn-text,.q-select{padding:4px 8px;font-size:11px}.vol-wrap{display:none!important}.s-title{font-size:14px}.e-title{font-size:12px}#thumb-preview{width:120px;height:67px;background-size:1200px auto!important}}@media screen and (max-height:400px) and (orientation:landscape){.top-bar{padding:10px}.controls{padding:5px 15px 10px}.s-title{display:none}}
-    </style>
-</head>
-<body>
-    <div id="player-wrap">
-        <video id="vid" playsinline></video>
-        <div class="vid-overlay" id="vid-click"></div>
-        <div class="buffering" id="buf" style="display:block;"></div> <div class="center-action" id="c-action">▶</div>
-        <div class="ripple-zone left" id="r-left"><div class="r-icon">⏪</div><div class="r-text">10s</div></div>
-        <div class="ripple-zone right" id="r-right"><div class="r-icon">⏩</div><div class="r-text">10s</div></div>
-        
-        <div class="ui-layer" id="ui">
-            <div class="top-bar"><div class="s-title" id="s-title">Memuat Data...</div><div class="e-title" id="e-title"></div></div>
-            <div class="controls">
-                <div class="progress-wrap" id="p-wrap">
-                    <div class="progress-bg"><div class="progress-fill" id="p-fill"></div></div>
-                    <div id="thumb-preview"></div>
-                </div>
-                <button class="btn" style="width:34px" id="btn-play">▶</button>
-                <div class="vol-wrap" id="vol-wrap">
-                    <button class="btn" style="width:34px" id="btn-vol">🔊</button>
-                    <div class="vol-track" id="v-track"><div class="vol-fill" id="v-fill"></div></div>
-                </div>
-                <span class="time-txt" id="time">00:00 / 00:00</span>
-                <button class="btn btn-text" id="btn-eps">Eps 1 ☰</button>
-                <select class="q-select" id="q-sel"></select>
-                <button class="btn" style="width:34px" id="btn-fs">⛶</button>
-            </div>
-        </div>
-        
-        <div class="drawer-backdrop" id="d-backdrop"></div>
-        <div class="eps-drawer" id="eps-drawer">
-            <div class="drawer-header"><span>Daftar Episode</span><button class="close-drawer" id="close-drawer">✕</button></div>
-            <div class="search-box"><input type="number" id="eps-search" placeholder="Cari episode..."></div>
-            <div class="eps-grid" id="eps-grid"></div>
-        </div>
-    </div>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #38bdf8;
+            --primary-hover: #0ea5e9;
+            --success: #4ade80;
+            --error: #f87171;
+            --border: #334155;
+            --code-bg: #090d16;
+        }
 
-    <script>
-        // ========================================================
-        // 1. TAUTAN KE API WORKER ANDA (WAJIB DIGANTI)
-        // ========================================================
-        const WORKER_URL = "https://WORKER-ANDA.nama-anda.workers.dev"; // <<-- GANTI INI
-        
-        let DATA = null;
-        let currIdx = 0;
-        let prefQ = "480p";
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
 
-        const $ = id => document.getElementById(id);
-        const vid=$("vid"),vidClick=$("vid-click"),ui=$("ui"),pWrap=$("p-wrap"),pFill=$("p-fill"),btnPlay=$("btn-play"),time=$("time"),qSel=$("q-sel"),btnEps=$("btn-eps"),epsDrawer=$("eps-drawer"),dBackdrop=$("d-backdrop"),closeDrawer=$("close-drawer"),epsSearch=$("eps-search"),epsGrid=$("eps-grid"),btnFs=$("btn-fs"),wrap=$("player-wrap"),thumbPreview=$("thumb-preview"),btnVol=$("btn-vol"),vTrack=$("v-track"),vFill=$("v-fill"),cAction=$("c-action"),rLeft=$("r-left"),rRight=$("r-right");
-        
-        // ========================================================
-        // 2. SISTEM FETCH DATA DARI API (DECOUPLED LOGIC)
-        // ========================================================
-        async function fetchApiData() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const type = urlParams.get('type'); // multi atau series
-            
-            try {
-                let apiEndpoint = "";
-                if (type === 'series') {
-                    const id = urlParams.get('id');
-                    const eps = urlParams.get('eps') || '';
-                    apiEndpoint = `${WORKER_URL}/api/series?id=${id}&eps=${eps}`;
-                } else if (type === 'multi') {
-                    const d = urlParams.get('d');
-                    apiEndpoint = `${WORKER_URL}/api/multi?d=${d}`;
-                } else {
-                    throw new Error("Parameter '?type=' tidak ditemukan pada URL.");
-                }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
 
-                const response = await fetch(apiEndpoint);
-                const json = await response.json();
+        header {
+            margin-bottom: 30px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 20px;
+        }
 
-                if (json.error) throw new Error(json.error);
+        h1 {
+            font-size: 28px;
+            margin: 0 0 8px 0;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-                DATA = json;
-                currIdx = DATA.initialIndex || 0;
-                $("buf").style.display = "none"; // Matikan loading awal
-                initPlayer(); // Jalankan player
-                
-            } catch (error) {
-                $("buf").style.display = "none";
-                $("s-title").innerText = "Gagal Memuat Video";
-                $("e-title").innerText = error.message;
-                console.error(error);
+        .subtitle {
+            color: var(--text-muted);
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media (min-width: 768px) {
+            .grid {
+                grid-template-columns: 350px 1fr;
             }
         }
 
-        // ========================================================
-        // 3. SISTEM UI & LOGIKA PLAYER (TETAP SEPERTI V14)
-        // ========================================================
-        let idleT;
-        const fmt=s=>{const m=Math.floor(s/60),x=Math.floor(s%60);return(m<10?"0"+m:m)+":"+(x<10?"0"+x:x)};
-        const wake=()=>{ui.classList.remove("idle");clearTimeout(idleT);idleT=setTimeout(()=>ui.classList.add("idle"),4000)};
-        ["mousemove","touchstart"].forEach(e=>document.addEventListener(e,wake));
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            height: fit-content;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-color);
+            color: white;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        button {
+            width: 100%;
+            background: var(--primary);
+            color: #0f172a;
+            border: none;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        button:disabled {
+            background: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .status-container {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid var(--border);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: bold;
+            text-align: center;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .status-idle { background: #475569; color: white; }
+        .status-loading { background: #eab308; color: #0f172a; }
+        .status-success { background: #22c55e; color: white; }
+        .status-error { background: #ef4444; color: white; }
+
+        .output-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .output-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .output-header {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        pre {
+            background: var(--code-bg);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            overflow-x: auto;
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+            font-size: 13.5px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin: 0;
+            color: #e2e8f0;
+        }
+
+        .response-text {
+            font-size: 15px;
+            color: #f1f5f9;
+            background: var(--code-bg);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            min-height: 50px;
+        }
+
+        .cors-warning {
+            font-size: 12.5px;
+            color: #f59e0b;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+
+        .cors-warning code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>🚀 AI Worker Debugger</h1>
+        <p class="subtitle">Antarmuka Web Pengujian & Debugging Cloudflare Wrangler / Production Worker</p>
+    </header>
+
+    <div class="grid">
+        <!-- Panel Kontrol Kiri -->
+        <div class="card">
+            <div class="form-group">
+                <label for="apiUrl">Target URL Endpoint</label>
+                <input type="text" id="apiUrl" value="https://ai.hertaaakiw.workers.dev/?tanya=" placeholder="http://localhost:8787/?tanya=">
+            </div>
+
+            <div class="form-group">
+                <label for="question">Pertanyaan Klien (Payload)</label>
+                <textarea id="question" placeholder="Masukkan pertanyaan pengujian...">jadwal seminggu xii-6</textarea>
+            </div>
+
+            <button id="btnSubmit" onclick="sendRequest()">Kirim Eksekusi / Debug</button>
+
+            <div class="status-container">
+                <label>Status HTTP & Engine</label>
+                <div id="statusBadge" class="status-badge status-idle">IDLE - Siap Menerima Perintah</div>
+            </div>
+
+            <div class="cors-warning">
+                <strong>Catatan CORS:</strong> Jika menembak ke <code>localhost</code> atau production langsung dari browser, pastikan Worker Anda mengembalikan header <code>Access-Control-Allow-Origin: *</code> agar tidak diblokir browser.
+            </div>
+        </div>
+
+        <!-- Panel Output Kanan -->
+        <div class="output-panel">
+            <!-- SQL Output -->
+            <div class="output-card">
+                <div class="output-header">🛠 [1] SQL YANG DIHASILKAN AI (Uji Pemetaan Sinonim)</div>
+                <pre id="sqlOutput">Belum ada data eksekusi...</pre>
+            </div>
+
+            <!-- Clean Facts Output -->
+            <div class="output-card">
+                <div class="output-header">🧮 [2] DATA BERSIH DARI ENGINE JAVASCRIPT (cleanFacts)</div>
+                <pre id="factsOutput">Belum ada data eksekusi...</pre>
+            </div>
+
+            <!-- Final Answer Output -->
+            <div class="output-card">
+                <div class="output-header">🤖 [3] RESPON AKHIR WORKER AI (Bahasa Indonesia)</div>
+                <div id="answerOutput" class="response-text">Belum ada data eksekusi...</div>
+            </div>
+
+            <!-- Raw JSON Debug -->
+            <div class="output-card">
+                <div class="output-header">🔍 FULL RAW JSON RESPONSE (Gabungan Error / Validasi)</div>
+                <pre id="rawOutput">Belum ada data eksekusi...</pre>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function sendRequest() {
+        const urlInput = document.getElementById('apiUrl').value.trim();
+        const questionInput = document.getElementById('question').value;
+        const btnSubmit = document.getElementById('btnSubmit');
+        const statusBadge = document.getElementById('statusBadge');
         
-        const popCenter=icon=>{cAction.innerText=icon;cAction.classList.remove("pop");void cAction.offsetWidth;cAction.classList.add("pop")};
-        const popRipple=side=>{const el=side==="left"?rLeft:rRight;el.classList.remove("active");void el.offsetWidth;el.classList.add("active")};
+        // Elemen Output
+        const sqlOutput = document.getElementById('sqlOutput');
+        const factsOutput = document.getElementById('factsOutput');
+        const answerOutput = document.getElementById('answerOutput');
+        const rawOutput = document.getElementById('rawOutput');
+
+        // Reset tampilan ke default loading
+        sqlOutput.textContent = 'Memproses...';
+        factsOutput.textContent = 'Memproses...';
+        answerOutput.textContent = 'Memproses...';
+        rawOutput.textContent = 'Memproses...';
         
-        const renderGrid=(filter="")=>{epsGrid.innerHTML=DATA.episodes.map((e,i)=>({e:e,i:i})).filter(o=>!filter||o.e.n.toString().includes(filter)).map(o=>'<button class="ep-btn '+(o.i===currIdx?'active':'')+'" data-idx="'+o.i+'">'+o.e.n+'</button>').join("");document.querySelectorAll(".ep-btn").forEach(b=>b.onclick=(ev)=>{currIdx=parseInt(ev.target.dataset.idx);loadVideo(currIdx);vid.play();closeD();wake()})};
-        
-        const loadVideo=idx=>{currIdx=idx;const ep=DATA.episodes[idx];$("s-title").innerText=DATA.title;$("e-title").innerText="Episode "+ep.n+(ep.t?" - "+ep.t:"");vid.poster=ep.tu||"";btnEps.innerText="Eps "+ep.n+" ☰";const options=Object.keys(ep.q);qSel.innerHTML=options.map(k=>'<option value="'+k+'">'+k+'</option>').join("");if(options.includes(prefQ))qSel.value=prefQ;else if(options.includes("480p"))qSel.value="480p";else qSel.value=options[0];vid.src=ep.q[qSel.value];vid.load()};
-        
-        const initPlayer=()=>{if(DATA.isSeries&&DATA.episodes.length>1)btnEps.style.display="flex";loadVideo(currIdx)};
-        
-        const openD=()=>{epsDrawer.classList.add("open");dBackdrop.classList.add("open");renderGrid()};
-        const closeD=()=>{epsDrawer.classList.remove("open");dBackdrop.classList.remove("open")};
-        btnEps.onclick=openD;closeDrawer.onclick=closeD;dBackdrop.onclick=closeD;epsSearch.oninput=e=>renderGrid(e.target.value);
-        let dStartX=0;epsDrawer.addEventListener("touchstart",e=>dStartX=e.touches[0].clientX,{passive:true});epsDrawer.addEventListener("touchend",e=>{if(e.changedTouches[0].clientX-dStartX>50)closeD()},{passive:true});
-        
-        qSel.onchange=()=>{prefQ=qSel.value;const t=vid.currentTime;const p=!vid.paused;vid.src=DATA.episodes[currIdx].q[prefQ];vid.currentTime=t;if(p)vid.play();wake()};
-        btnPlay.onclick=()=>vid.paused?vid.play():vid.pause();
-        vid.onplay=()=>{btnPlay.innerText="⏸";popCenter("▶");wake()};
-        vid.onpause=()=>{btnPlay.innerText="▶";popCenter("⏸");wake()};
-        
-        const getClientX=e=>e.touches&&e.touches.length>0?e.touches[0].clientX:(e.changedTouches&&e.changedTouches.length>0?e.changedTouches[0].clientX:e.clientX);
-        let isDragTime=false,wasPlaying=false;
-        const updateTimeUI=e=>{const r=pWrap.getBoundingClientRect();const cX=getClientX(e);const p=Math.max(0,Math.min(1,(cX-r.left)/r.width));pFill.style.width=(p*100)+"%";time.innerText=fmt(p*vid.duration)+" / "+(vid.duration?fmt(vid.duration):"00:00");return p};
-        const handleScrub=clientX=>{if(!DATA)return;const ep=DATA.episodes[currIdx];if(!ep.ts)return;const r=pWrap.getBoundingClientRect();const p=Math.max(0,Math.min(1,(clientX-r.left)/r.width));if(vid.duration){const hT=p*vid.duration;const idx=Math.floor(hT/10);const col=idx%10,row=Math.floor(idx/10);thumbPreview.style.backgroundImage="url("+ep.ts+")";thumbPreview.style.backgroundPosition="-"+(col*160)+"px -"+(row*90)+"px";let lPos=clientX-r.left;if(lPos<80)lPos=80;if(lPos>r.width-80)lPos=r.width-80;thumbPreview.style.left=lPos+"px";thumbPreview.style.display="block"}};
-        const startDrag=e=>{isDragTime=true;wasPlaying=!vid.paused;vid.pause();vid.currentTime=updateTimeUI(e)*vid.duration};
-        const moveDrag=e=>{if(!isDragTime)return;e.preventDefault();vid.currentTime=updateTimeUI(e)*vid.duration;handleScrub(getClientX(e))};
-        const endDrag=e=>{if(!isDragTime)return;isDragTime=false;vid.currentTime=updateTimeUI(e)*vid.duration;if(wasPlaying)vid.play();thumbPreview.style.display="none"};
-        pWrap.addEventListener("mousedown",startDrag);pWrap.addEventListener("touchstart",startDrag,{passive:false});document.addEventListener("mousemove",moveDrag);document.addEventListener("touchmove",moveDrag,{passive:false});document.addEventListener("mouseup",endDrag);document.addEventListener("touchend",endDrag);pWrap.addEventListener("mousemove",e=>{if(!isDragTime)handleScrub(e.clientX)});pWrap.addEventListener("mouseleave",()=>{if(!isDragTime)thumbPreview.style.display="none"});
-        
-        vid.ontimeupdate=()=>{if(!isDragTime){pFill.style.width=(vid.currentTime/vid.duration)*100+"%";time.innerText=fmt(vid.currentTime)+" / "+(vid.duration?fmt(vid.duration):"00:00")}};
-        vid.onwaiting=()=>wrap.classList.add("show-buf");vid.onplaying=()=>wrap.classList.remove("show-buf");
-        btnFs.onclick=()=>{if(!document.fullscreenElement)wrap.requestFullscreen().catch(()=>{});else document.exitFullscreen()};
-        
-        let tapT=0,tapTimer;
-        vidClick.onclick=e=>{const now=Date.now();if(now-tapT<250){clearTimeout(tapTimer);const r=vidClick.getBoundingClientRect();if(e.clientX<r.left+r.width/2){vid.currentTime=Math.max(0,vid.currentTime-10);popRipple("left")}else{vid.currentTime=Math.min(vid.duration,vid.currentTime+10);popRipple("right")}tapT=0}else{tapT=now;tapTimer=setTimeout(()=>{if(vid.paused)vid.play();else vid.pause()},250)}wake()};
-        
-        let lastVol=1,isDragVol=false;
-        const updateVol=()=>{vFill.style.width=(vid.volume*100)+"%";if(vid.muted||vid.volume===0)btnVol.innerText="🔇";else if(vid.volume<0.5)btnVol.innerText="🔉";else btnVol.innerText="🔊"};
-        btnVol.onclick=()=>{if(vid.muted||vid.volume===0){vid.muted=false;vid.volume=lastVol>0?lastVol:1}else{lastVol=vid.volume;vid.muted=true}updateVol();wake()};
-        const setVol=e=>{const r=vTrack.getBoundingClientRect();const v=Math.max(0,Math.min(1,(getClientX(e)-r.left)/r.width));vid.muted=false;vid.volume=v;lastVol=v;updateVol()};
-        vTrack.addEventListener("mousedown",e=>{isDragVol=true;setVol(e)});vTrack.addEventListener("touchstart",e=>{isDragVol=true;setVol(e);e.preventDefault()},{passive:false});document.addEventListener("mousemove",e=>{if(isDragVol)setVol(e)});document.addEventListener("touchmove",e=>{if(isDragVol){e.preventDefault();setVol(e)}},{passive:false});document.addEventListener("mouseup",()=>isDragVol=false);document.addEventListener("touchend",()=>isDragVol=false);vid.onvolumechange=updateVol;
-        
-        document.addEventListener("keydown",e=>{if(document.activeElement.tagName==="INPUT")return;const k=e.key.toLowerCase();if([" ","k","f","arrowright","l","arrowleft","j","m","arrowup","arrowdown"].includes(k))wake();switch(k){case" ":case"k":e.preventDefault();if(vid.paused)vid.play();else vid.pause();break;case"f":e.preventDefault();btnFs.click();break;case"arrowright":case"l":if(!DATA)break;vid.currentTime=Math.min(vid.duration,vid.currentTime+10);popRipple("right");break;case"arrowleft":case"j":if(!DATA)break;vid.currentTime=Math.max(0,vid.currentTime-10);popRipple("left");break;case"m":vid.muted=!vid.muted;break;case"arrowup":e.preventDefault();vid.volume=Math.min(1,vid.volume+.1);break;case"arrowdown":e.preventDefault();vid.volume=Math.max(0,vid.volume-.1);break;}});
-        
-        // ========================================================
-        // 4. JALANKAN PROSES FETCH SAAT HALAMAN DIBUKA
-        // ========================================================
-        fetchApiData();
-    </script>
+        btnSubmit.disabled = true;
+        statusBadge.className = 'status-badge status-loading';
+        statusBadge.textContent = '🚀 Mengirim Request ke Worker...';
+
+        try {
+            // Sesuai dengan struktur script Python (POST request membawa payload JSON)
+            const response = await fetch(urlInput, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    question: questionInput
+                })
+            });
+
+            const statusCode = response.status;
+            let resJson;
+            
+            try {
+                resJson = await response.json();
+            } catch (e) {
+                throw new Error(`Respon tidak valid (Bukan JSON). Status Code: ${statusCode}`);
+            }
+
+            // Tampilkan Full JSON response untuk keperluan debugging mendalam
+            rawOutput.textContent = JSON.stringify(resJson, null, 2);
+
+            if (statusCode === 200 && resJson.success) {
+                statusBadge.className = 'status-badge status-success';
+                statusBadge.textContent = `=== HTTP STATUS CODE: ${statusCode} (BERHASIL) ===`;
+
+                // Isi data sesuai properti objek respon JSON
+                sqlOutput.textContent = resJson.query_executed || 'Tidak ada data SQL (null/empty)';
+                
+                if (resJson.raw_facts_extracted) {
+                    factsOutput.textContent = typeof resJson.raw_facts_extracted === 'object' 
+                        ? JSON.stringify(resJson.raw_facts_extracted, null, 2)
+                        : resJson.raw_facts_extracted;
+                } else {
+                    factsOutput.textContent = 'Tidak ada data cleanFacts (null/empty)';
+                }
+
+                answerOutput.textContent = resJson.answer || 'Tidak ada jawaban akhir dari AI.';
+            } else {
+                statusBadge.className = 'status-badge status-error';
+                statusBadge.textContent = `❌ WORKER ERROR / KONDISI GAGAL (HTTP ${statusCode})`;
+                
+                sqlOutput.textContent = 'Gagal memuat - Periksa Log Full JSON';
+                factsOutput.textContent = 'Gagal memuat - Periksa Log Full JSON';
+                answerOutput.textContent = 'Gagal memuat - Periksa Log Full JSON';
+            }
+
+        } catch (error) {
+            statusBadge.className = 'status-badge status-error';
+            statusBadge.textContent = '❌ KONEKSI GAGAL / CORS ERROR';
+            
+            const errorMsg = `[❌] KONEKSI GAGAL / EXCEPTION:
+` +
+                             `1. Pastikan server lokal Wrangler Anda sudah aktif (npx wrangler dev) jika menembak localhost.
+` +
+                             `2. Jika menembak URL Production, pastikan Worker mengizinkan CORS.
+
+` +
+                             `Detail Error: ${error.message}`;
+            
+            rawOutput.textContent = errorMsg;
+            sqlOutput.textContent = 'Error koneksi';
+            factsOutput.textContent = 'Error koneksi';
+            answerOutput.textContent = 'Error koneksi';
+        } finally {
+            btnSubmit.disabled = false;
+        }
+    }
+</script>
+
 </body>
 </html>
